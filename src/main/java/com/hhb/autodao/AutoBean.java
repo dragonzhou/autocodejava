@@ -29,7 +29,8 @@ public class AutoBean {
 	private static Statement	stm;
 	private static ResultSet	rs;
 	private static String		driver		= "com.mysql.jdbc.Driver";
-	private static String		url			= "jdbc:mysql://localhost:3306/create";
+	private static String		database_name		= "create";
+	private static String		url			= "jdbc:mysql://localhost:3306/"+database_name;
 	private static String		username	= "root";
 	private static String		password	= "andy";
 	private static String		packageName	= "com.company.biz.huiche";
@@ -41,9 +42,8 @@ public class AutoBean {
 			DriverManager.registerDriver((Driver) Class.forName(driver).newInstance());
 			conn = DriverManager.getConnection(url, username, password);
 			stm = conn.createStatement();
-
 			// 传递数据原
-			List<String> ltn = getAllTabName("create");
+			List<String> ltn = getAllTabName(database_name);
 			System.out.println("----------connect success----------ltn:" + ltn);
 			Map<String, List<Colm>> mtcn = getTabColName(ltn);
 			mtcn = toUL(mtcn);
