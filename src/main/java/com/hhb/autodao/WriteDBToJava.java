@@ -299,8 +299,8 @@ public class WriteDBToJava {
 				output.write("\tboolean update" + "(" + key + " " + s + ");\n\n");
 				output.write("\tboolean delete" + "(Integer " + l.get(0).getName() + ");\n\n");
 				output.write("\t" + key + " get" + "(Integer " + l.get(0).getName() + ");\n\n");
-				// output.write("\tList<"+key+"> query"+key+"ByWhere("+key+" "+s+")throws Exception;\n\n");
-				output.write("\tList< " + key + ">  list" + "(" + key + " " + s + ");\n");
+				output.write("\tList< " + key + ">  list" + "(int pageStart, int pageSize);\n");
+				output.write("\tint" + " count(int pageStart, int pageSize);\n");
 				output.write("}");
 				output.close();
 			} catch (IOException e) {
@@ -415,7 +415,7 @@ public class WriteDBToJava {
 				output.write("\t\tsp.set"+ getInt(l.get(0).getType()) + "( "+ l.get(0).getName() + ");\n");
 				output.write("\t\treturn this.jdbc.query(sql," + key + ".class, sp);\n");
 				output.write("\t}\n\n");
-				output.write("\tpublic List<" + key + "> list" + "(" + key + " " + s + "){\n");
+				output.write("\tpublic List<" + key + "> list" + "(int pageStart, int pageSize){\n");
 				output.write("\t\tStringBuilder sb = new StringBuilder();\n");
 				output.write("\t\tsb.append(\"select * from \");\n");
 				output.write("\t\tsb.append(TABLE);\n");
@@ -423,6 +423,16 @@ public class WriteDBToJava {
 				output.write("\t\tStatementParameter sp = new StatementParameter();\n");
 				output.write("\t\treturn this.jdbc.queryForList(sb.toString(), " + key + ".class, sp);\n");
 				output.write("\t}\n\n");
+				
+				output.write("\tpublic int count" + "(int pageStart, int pageSize){\n");
+				output.write("\t\tStringBuilder sb = new StringBuilder();\n");
+				output.write("\t\tsb.append(\"select count(1) from \");\n");
+				output.write("\t\tsb.append(TABLE);\n");
+				output.write("\t\tsb.append(\" where 1=1 \");\n");
+				output.write("\t\tStatementParameter sp = new StatementParameter();\n");
+				output.write("\t\treturn this.jdbc.queryForInt(sb.toString(),sp);\n");
+				output.write("\t}\n\n");
+				
 				output.write("}");
 				output.close();
 			} catch (IOException e) {
