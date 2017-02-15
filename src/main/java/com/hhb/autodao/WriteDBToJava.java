@@ -297,10 +297,12 @@ public class WriteDBToJava {
 				output.write("public interface " + key + "Dao  {\n\n");
 				output.write("\tboolean insert" + "(" + key + " " + s + ");\n\n");
 				output.write("\tboolean update" + "(" + key + " " + s + ");\n\n");
-				output.write("\tboolean delete" + "(Integer " + l.get(0).getName() + ");\n\n");
-				output.write("\t" + key + " get" + "(Integer " + l.get(0).getName() + ");\n\n");
+				output.write("\tboolean delete" + "(" + getInteger(l.get(0).getType()) + " " + l.get(0).getName()
+								+ ");\n\n");
+				output.write("\t" + key + " get" + "(" + getInteger(l.get(0).getType()) + " " + l.get(0).getName()
+								+ ");\n\n");
 				output.write("\tList< " + key + ">  list" + "(int pageStart, int pageSize);\n");
-				output.write("\tint" + " count(int pageStart, int pageSize);\n");
+				output.write("\tint" + " count();\n");
 				output.write("}");
 				output.close();
 			} catch (IOException e) {
@@ -325,7 +327,7 @@ public class WriteDBToJava {
 
 		return type;
 	}
-	
+
 	public static String getInteger(String type) {
 		if (type.equals("VARCHAR")) {
 			return "String";
@@ -401,18 +403,20 @@ public class WriteDBToJava {
 				// 插入
 				output.write("\t\treturn this.jdbc.updateForBoolean(ub);\n");
 				output.write("\t}\n\n");
-				output.write("\tpublic boolean delete("+getInteger(l.get(0).getType()) +" "+ l.get(0).getName() + "){\n");
+				output.write("\tpublic boolean delete(" + getInteger(l.get(0).getType()) + " " + l.get(0).getName()
+								+ "){\n");
 				output.write("\t\tString sql = \"delete  from \" + TABLE + \" where " + l.get(0).getName()
 								+ " = ?\";\n");
 				output.write("\t\tStatementParameter sp = new StatementParameter();\n");
-				output.write("\t\tsp.set"+ getInt(l.get(0).getType()) + "( "+ l.get(0).getName() + ");\n");
+				output.write("\t\tsp.set" + getInt(l.get(0).getType()) + "( " + l.get(0).getName() + ");\n");
 				output.write("\t\treturn this.jdbc.updateForBoolean(sql, sp);\n");
 				output.write("\t}\n\n");
-				output.write("\tpublic " + key + " get("+getInteger(l.get(0).getType()) +" "+ l.get(0).getName() + "){\n");
+				output.write("\tpublic " + key + " get(" + getInteger(l.get(0).getType()) + " " + l.get(0).getName()
+								+ "){\n");
 				output.write("\t\tString sql = \"select * from \" + TABLE + \" where " + l.get(0).getName()
 								+ " = ?\";\n");
 				output.write("\t\tStatementParameter sp = new StatementParameter();\n");
-				output.write("\t\tsp.set"+ getInt(l.get(0).getType()) + "( "+ l.get(0).getName() + ");\n");
+				output.write("\t\tsp.set" + getInt(l.get(0).getType()) + "( " + l.get(0).getName() + ");\n");
 				output.write("\t\treturn this.jdbc.query(sql," + key + ".class, sp);\n");
 				output.write("\t}\n\n");
 				output.write("\tpublic List<" + key + "> list" + "(int pageStart, int pageSize){\n");
@@ -423,8 +427,8 @@ public class WriteDBToJava {
 				output.write("\t\tStatementParameter sp = new StatementParameter();\n");
 				output.write("\t\treturn this.jdbc.queryForList(sb.toString(), " + key + ".class, sp);\n");
 				output.write("\t}\n\n");
-				
-				output.write("\tpublic int count" + "(int pageStart, int pageSize){\n");
+
+				output.write("\tpublic int count" + "(){\n");
 				output.write("\t\tStringBuilder sb = new StringBuilder();\n");
 				output.write("\t\tsb.append(\"select count(1) from \");\n");
 				output.write("\t\tsb.append(TABLE);\n");
@@ -432,7 +436,7 @@ public class WriteDBToJava {
 				output.write("\t\tStatementParameter sp = new StatementParameter();\n");
 				output.write("\t\treturn this.jdbc.queryForInt(sb.toString(),sp);\n");
 				output.write("\t}\n\n");
-				
+
 				output.write("}");
 				output.close();
 			} catch (IOException e) {
@@ -469,7 +473,8 @@ public class WriteDBToJava {
 				output.write("\tboolean delete" + "(Integer " + l.get(0).getName() + ");\n\n");
 				output.write("\t" + key + " get" + "(Integer " + l.get(0).getName() + ");\n\n");
 				// output.write("\tList<"+key+"> query"+key+"ByWhere("+key+" "+s+")throws Exception;\n\n");
-				output.write("\tList< " + key + ">  list" + "(" + key + " " + s + ");\n");
+				output.write("\tList< " + key + ">  list" + "(" + key + " " + s + ",int pageStart, int pageSize"
+								+ ");\n");
 				output.write("}");
 				output.close();
 			} catch (IOException e) {
@@ -497,26 +502,36 @@ public class WriteDBToJava {
 				output.write("package " + pakg + "." + subUrl4 + ".impl;\n\n");
 				output.write("import org.springframework.stereotype.Service;\n");
 				output.write("import java.util.List;\n");
+				output.write("import import com.xiaoerzuche.common.core.data.jdbc.Page;\n");
 				output.write("import " + pakg + "." + subUrl1 + "." + key + ";\n");
 				output.write("import " + pakg + "." + subUrl4 + "." + key + "Service;\n");
+				output.write("import " + pakg + "." + "dao" + "." + key + "Dao;\n");
 				// output.write("import com.ucf.onlinepay.framework.exception.in.FnFiTechnicalException;\n\n");
 				output.write("@Service\n");
 				output.write("public class " + key + "ServiceImpl  implements " + key + "Service {\n\n");
 
+				output.write("\t@Autowired\n");
+				output.write("\tprivate " + key + "Dao " + s + "Dao" + ";\n\n");
+
 				output.write("\tpublic boolean insert" + "(" + key + " " + s + "){\n");
-				output.write("\treturn false;\n");
+				output.write("\t\treturn this." + s + "Dao" + ".insert(" + s + ");\n");
 				output.write("\t}\n\n");
 				output.write("\tpublic boolean update" + "(" + key + " " + s + "){\n");
-				output.write("\treturn false;\n");
+				output.write("\t\treturn this." + s + "Dao" + ".update(" + s + ");\n");
 				output.write("\t}\n\n");
-				output.write("\tpublic boolean delete" + "(Integer " + l.get(0).getName() + "){\n");
-				output.write("\treturn false;\n");
+				output.write("\tpublic boolean delete("+ getInteger(l.get(0).getType()) + " " + l.get(0).getName() + "){\n");
+				output.write("\t\treturn this." + s + "Dao" + ".delete(" + l.get(0).getName() + ");\n");
 				output.write("\t}\n\n");
-				output.write("\tpublic " + key + " get" + "(Integer " + l.get(0).getName() + "){\n");
-				output.write("\treturn null;\n");
+				output.write("\tpublic " + key + " get(" + getInteger(l.get(0).getType()) + " "  + l.get(0).getName() + "){\n");
+				output.write("\t\treturn this." + s + "Dao" + ".get(" + l.get(0).getName() + ");\n");
 				output.write("\t}\n\n");
-				output.write("\tpublic List<" + key + "> list" + "(" + key + " " + s + "){\n");
-				output.write("\treturn null;\n");
+				output.write("\tpublic Page<" + key + "> list" + "(int pageStart, int pageSize" + "){\n");
+				output.write("\t\t"+"Page<" + key + ">"+ " "+"page=new "+" Page<" + key + ">()"+ ";\n");
+				output.write("\t\t"+"List<" + key + ">"+ " "+"data="+"this." + s + "Dao" + ".list(pageStart,pageSize)" + ";\n");
+				output.write("\t\t"+"int" +" "+"count="+"this." + s + "Dao" + ".count()" + ";\n");
+				output.write("\t\tpage.setCount(count);\n");
+				output.write("\t\tpage.setData(data);\n");
+				output.write("\t\treturn page;\n");
 				output.write("\t}\n\n");
 
 				output.write("}");

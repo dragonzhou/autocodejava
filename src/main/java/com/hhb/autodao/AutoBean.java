@@ -33,7 +33,7 @@ public class AutoBean {
 	private static String		url			= "jdbc:mysql://localhost:3306/"+database_name;
 	private static String		username	= "root";
 	private static String		password	= "andy";
-	private static String		packageName	= "com.company.biz.huiche";
+	private static String		packageName	= "com.company.biz.thirdplatform";
 
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException,
 					ClassNotFoundException {
