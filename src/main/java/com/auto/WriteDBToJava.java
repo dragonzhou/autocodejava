@@ -1,4 +1,4 @@
-package com.hhb.autodao;
+package com.auto;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -312,6 +312,9 @@ public class WriteDBToJava {
 	}
 
 	public static String getInt(String type) {
+		if (type.equals("CHAR")) {
+			return "String";
+		}
 		if (type.equals("VARCHAR")) {
 			return "String";
 		}
@@ -363,12 +366,12 @@ public class WriteDBToJava {
 				String s = AutoBean.toL(key.charAt(0)) + key.substring(1, key.length());
 				output.write("package " + pakg + "." + subUrl3 + ".impl;\n\n");
 				output.write("import org.springframework.stereotype.Repository;\n");
-				output.write("import com.company.common.core.data.jdbc.Jdbc;\n");
+				output.write("import com."+AutoBean.packagename_company+".common.core.data.jdbc.Jdbc;\n");
 				output.write("import org.springframework.beans.factory.annotation.Autowired;\n");
 				output.write("import org.apache.commons.lang.StringUtils;\n");
-				output.write("import com.company.common.core.data.jdbc.StatementParameter;\n");
-				output.write("import com.company.common.core.data.jdbc.builder.InsertBuilder;\n");
-				output.write("import com.company.common.core.data.jdbc.builder.UpdateBuilder;\n");
+				output.write("import com."+AutoBean.packagename_company+".common.core.data.jdbc.StatementParameter;\n");
+				output.write("import com."+AutoBean.packagename_company+".common.core.data.jdbc.builder.InsertBuilder;\n");
+				output.write("import com."+AutoBean.packagename_company+".common.core.data.jdbc.builder.UpdateBuilder;\n");
 				output.write("import java.util.List;\n");
 				output.write("import " + pakg + "." + subUrl1 + "." + key + ";\n");
 				output.write("import " + pakg + "." + subUrl3 + "." + key + "Dao;\n");
@@ -464,17 +467,19 @@ public class WriteDBToJava {
 				output.write("package " + pakg + "." + subUrl4 + ";\n\n");
 				output.write("import java.util.List;\n");
 				output.write("import " + pakg + "." + subUrl1 + "." + key + ";\n");
+				output.write("import com.company.common.core.data.jdbc.Page;\n");
 				// output.write("import com.ucf.onlinepay.framework.exception.in.FnFiTechnicalException;\n\n");
 
 				// output.write("@Repository(\""+AutoBean.toL(key.charAt(0))+key.substring(1)+"Dao\")\n");
 				output.write("public interface " + key + "Service  {\n\n");
 				output.write("\tboolean insert" + "(" + key + " " + s + ");\n\n");
 				output.write("\tboolean update" + "(" + key + " " + s + ");\n\n");
-				output.write("\tboolean delete" + "(Integer " + l.get(0).getName() + ");\n\n");
-				output.write("\t" + key + " get" + "(Integer " + l.get(0).getName() + ");\n\n");
+				output.write("\tboolean delete" + "(" + getInteger(l.get(0).getType()) + " " + l.get(0).getName()
+								+ ");\n\n");
+				output.write("\t" + key + " get" + "(" + getInteger(l.get(0).getType()) + " " + l.get(0).getName()
+								+ ");\n\n");
 				// output.write("\tList<"+key+"> query"+key+"ByWhere("+key+" "+s+")throws Exception;\n\n");
-				output.write("\tList< " + key + ">  list" + "(" + key + " " + s + ",int pageStart, int pageSize"
-								+ ");\n");
+				output.write("\tPage< " + key + ">  list" + "(" + "int pageStart, int pageSize" + ");\n");
 				output.write("}");
 				output.close();
 			} catch (IOException e) {
@@ -502,7 +507,8 @@ public class WriteDBToJava {
 				output.write("package " + pakg + "." + subUrl4 + ".impl;\n\n");
 				output.write("import org.springframework.stereotype.Service;\n");
 				output.write("import java.util.List;\n");
-				output.write("import import com.xiaoerzuche.common.core.data.jdbc.Page;\n");
+				output.write("import org.springframework.beans.factory.annotation.Autowired;\n");
+				output.write("import com.company.common.core.data.jdbc.Page;\n");
 				output.write("import " + pakg + "." + subUrl1 + "." + key + ";\n");
 				output.write("import " + pakg + "." + subUrl4 + "." + key + "Service;\n");
 				output.write("import " + pakg + "." + "dao" + "." + key + "Dao;\n");
@@ -519,16 +525,19 @@ public class WriteDBToJava {
 				output.write("\tpublic boolean update" + "(" + key + " " + s + "){\n");
 				output.write("\t\treturn this." + s + "Dao" + ".update(" + s + ");\n");
 				output.write("\t}\n\n");
-				output.write("\tpublic boolean delete("+ getInteger(l.get(0).getType()) + " " + l.get(0).getName() + "){\n");
+				output.write("\tpublic boolean delete(" + getInteger(l.get(0).getType()) + " " + l.get(0).getName()
+								+ "){\n");
 				output.write("\t\treturn this." + s + "Dao" + ".delete(" + l.get(0).getName() + ");\n");
 				output.write("\t}\n\n");
-				output.write("\tpublic " + key + " get(" + getInteger(l.get(0).getType()) + " "  + l.get(0).getName() + "){\n");
+				output.write("\tpublic " + key + " get(" + getInteger(l.get(0).getType()) + " " + l.get(0).getName()
+								+ "){\n");
 				output.write("\t\treturn this." + s + "Dao" + ".get(" + l.get(0).getName() + ");\n");
 				output.write("\t}\n\n");
 				output.write("\tpublic Page<" + key + "> list" + "(int pageStart, int pageSize" + "){\n");
-				output.write("\t\t"+"Page<" + key + ">"+ " "+"page=new "+" Page<" + key + ">()"+ ";\n");
-				output.write("\t\t"+"List<" + key + ">"+ " "+"data="+"this." + s + "Dao" + ".list(pageStart,pageSize)" + ";\n");
-				output.write("\t\t"+"int" +" "+"count="+"this." + s + "Dao" + ".count()" + ";\n");
+				output.write("\t\t" + "Page<" + key + ">" + " " + "page=new " + " Page<" + key + ">()" + ";\n");
+				output.write("\t\t" + "List<" + key + ">" + " " + "data=" + "this." + s + "Dao"
+								+ ".list(pageStart,pageSize)" + ";\n");
+				output.write("\t\t" + "int" + " " + "count=" + "this." + s + "Dao" + ".count()" + ";\n");
 				output.write("\t\tpage.setCount(count);\n");
 				output.write("\t\tpage.setData(data);\n");
 				output.write("\t\treturn page;\n");

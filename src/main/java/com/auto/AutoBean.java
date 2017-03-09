@@ -1,4 +1,5 @@
-package com.hhb.autodao;
+package com.auto;
+
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -29,11 +30,12 @@ public class AutoBean {
 	private static Statement	stm;
 	private static ResultSet	rs;
 	private static String		driver		= "com.mysql.jdbc.Driver";
-	private static String		database_name		= "create";
+	private static String		database_name		= "coupons";
 	private static String		url			= "jdbc:mysql://localhost:3306/"+database_name;
 	private static String		username	= "root";
 	private static String		password	= "andy";
-	private static String		packageName	= "com.company.biz.thirdplatform";
+	public static String		packagename_company	= "xiaoerzuche";
+	private static String		packageName	= "com."+packagename_company+".biz.order";
 
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException,
 					ClassNotFoundException {
