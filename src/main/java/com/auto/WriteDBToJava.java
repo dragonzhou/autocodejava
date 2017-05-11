@@ -36,6 +36,9 @@ public class WriteDBToJava {
 		if ("long".equalsIgnoreCase(name)) {
 			return "Integer";
 		}
+		if ("Boolean".equalsIgnoreCase(name)) {
+			return "Integer";
+		}
 		return name;
 	}
 
@@ -87,7 +90,7 @@ public class WriteDBToJava {
 					line.append(key + " ");
 					line.append("set" + AutoBean.toU(colm.getName().charAt(0))
 									+ colm.getName().substring(1, colm.getName().length()));
-					line.append(" (" + colm.getTypeName() + " " + colm.getName() + ") {\n");
+					line.append(" (" + longtoInteger(colm.getTypeName()) + " " + colm.getName() + ") {\n");
 					output.write(line.toString());
 
 					line = new StringBuffer();
@@ -109,7 +112,7 @@ public class WriteDBToJava {
 					line = new StringBuffer();
 					line.append("\t\t");
 					line.append("public ");
-					line.append(colm.getTypeName() + " ");
+					line.append(longtoInteger(colm.getTypeName()) + " ");
 					line.append("get" + AutoBean.toU(colm.getName().charAt(0))
 									+ colm.getName().substring(1, colm.getName().length()));
 					line.append(" () {\n");
@@ -125,6 +128,8 @@ public class WriteDBToJava {
 					line.append("\n\n");
 					output.write(line.toString());
 				}
+				output.write("\t\tpublic " + key + " (){ \n\t\t\tsuper();\n\t\t}\n");
+
 				output.write("}\n");
 				output.close();
 			} catch (IOException e) {
@@ -301,8 +306,8 @@ public class WriteDBToJava {
 								+ ");\n\n");
 				output.write("\t" + key + " get" + "(" + getInteger(l.get(0).getType()) + " " + l.get(0).getName()
 								+ ");\n\n");
-				output.write("\tList< " + key + ">  list" + "(int pageStart, int pageSize);\n");
-				output.write("\tint" + " count();\n");
+				output.write("\tList< " + key + ">  list(" + key + " " + s + ",int pageStart, int pageSize);\n");
+				output.write("\tint" + " count("+ key + " " + s +");\n");
 				output.write("}");
 				output.close();
 			} catch (IOException e) {
@@ -327,7 +332,9 @@ public class WriteDBToJava {
 		if (type.contains("INT")) {
 			return "Int";
 		}
-
+		if (type.contains("DOUBLE")) {
+			return "Double";
+		}
 		return type;
 	}
 
@@ -366,12 +373,12 @@ public class WriteDBToJava {
 				String s = AutoBean.toL(key.charAt(0)) + key.substring(1, key.length());
 				output.write("package " + pakg + "." + subUrl3 + ".impl;\n\n");
 				output.write("import org.springframework.stereotype.Repository;\n");
-				output.write("import com."+AutoBean.packagename_company+".common.core.data.jdbc.Jdbc;\n");
+				output.write("import com" + ".company" + ".common.core.data.jdbc.Jdbc;\n");
 				output.write("import org.springframework.beans.factory.annotation.Autowired;\n");
 				output.write("import org.apache.commons.lang.StringUtils;\n");
-				output.write("import com."+AutoBean.packagename_company+".common.core.data.jdbc.StatementParameter;\n");
-				output.write("import com."+AutoBean.packagename_company+".common.core.data.jdbc.builder.InsertBuilder;\n");
-				output.write("import com."+AutoBean.packagename_company+".common.core.data.jdbc.builder.UpdateBuilder;\n");
+				output.write("import com" + ".company" + ".common.core.data.jdbc.StatementParameter;\n");
+				output.write("import com" + ".company" + ".common.core.data.jdbc.builder.InsertBuilder;\n");
+				output.write("import com" + ".company" + ".common.core.data.jdbc.builder.UpdateBuilder;\n");
 				output.write("import java.util.List;\n");
 				output.write("import " + pakg + "." + subUrl1 + "." + key + ";\n");
 				output.write("import " + pakg + "." + subUrl3 + "." + key + "Dao;\n");
@@ -396,9 +403,11 @@ public class WriteDBToJava {
 				output.write("\tpublic boolean update" + "(" + key + " " + s + "){\n");
 				output.write("\t\tUpdateBuilder ub = new UpdateBuilder(TABLE);\n");
 				for (Colm colm : l) {
+					output.write("\t\tif (null != " + s + ".get" + AutoBean.getUpper(colm.getName()) + "()){\n");
 					output.write("\t\tub.set" + getInt(colm.getType()) + "(\""
 									+ AutoBean.jNameToDbName(colm.getName()).toLowerCase() + "\"," + s + ".get"
 									+ AutoBean.getUpper(colm.getName()) + "());\n");
+					output.write("\t\t}\n\n");
 				}
 				output.write("\t\tub.where.set" + getInt(l.get(0).getType()) + "(\""
 								+ AutoBean.jNameToDbName(l.get(0).getName()).toLowerCase() + "\"," + s + ".get"
@@ -422,21 +431,51 @@ public class WriteDBToJava {
 				output.write("\t\tsp.set" + getInt(l.get(0).getType()) + "( " + l.get(0).getName() + ");\n");
 				output.write("\t\treturn this.jdbc.query(sql," + key + ".class, sp);\n");
 				output.write("\t}\n\n");
-				output.write("\tpublic List<" + key + "> list" + "(int pageStart, int pageSize){\n");
+				output.write("\tpublic List<" + key + "> list" + "(" + key + " " + s
+								+ ",int pageStart, int pageSize){\n");
 				output.write("\t\tStringBuilder sb = new StringBuilder();\n");
 				output.write("\t\tsb.append(\"select * from \");\n");
 				output.write("\t\tsb.append(TABLE);\n");
 				output.write("\t\tsb.append(\" where 1=1 \");\n");
 				output.write("\t\tStatementParameter sp = new StatementParameter();\n");
+
+				for (Colm colm : l) {
+					if(!getInt(colm.getType()).equals("Date"))
+					{
+						output.write("\t\tif (null != " + s + ".get" + AutoBean.getUpper(colm.getName()) + "()){\n");
+						output.write("\t\tsb.append" + "(\" and " + AutoBean.jNameToDbName(colm.getName()).toLowerCase()
+										+ "=?\");\n");
+						output.write("\t\tsp.set" + getInt(colm.getType()) + "(" + s + ".get"
+										+ AutoBean.getUpper(colm.getName()) + "());\n");
+						output.write("\t\t}\n\n");
+					}
+				}
+				output.write("\t\tif (pageSize > 0) {\n");
+				output.write("\t\tsb.append(\" limit ?, ?\");\n");
+				output.write("\t\tsp.setInt(pageStart);\n");
+				output.write("\t\tsp.setInt(pageSize);\n");
+				output.write("\t\t}\n");
 				output.write("\t\treturn this.jdbc.queryForList(sb.toString(), " + key + ".class, sp);\n");
 				output.write("\t}\n\n");
 
-				output.write("\tpublic int count" + "(){\n");
+				output.write("\tpublic int count(" + key + " " + s + "){\n");
 				output.write("\t\tStringBuilder sb = new StringBuilder();\n");
 				output.write("\t\tsb.append(\"select count(1) from \");\n");
 				output.write("\t\tsb.append(TABLE);\n");
 				output.write("\t\tsb.append(\" where 1=1 \");\n");
 				output.write("\t\tStatementParameter sp = new StatementParameter();\n");
+				for (Colm colm : l) {
+					if(!getInt(colm.getType()).equals("Date"))
+					{
+						output.write("\t\tif (null != " + s + ".get" + AutoBean.getUpper(colm.getName()) + "()){\n");
+						output.write("\t\tsb.append" + "(\" and " + AutoBean.jNameToDbName(colm.getName()).toLowerCase()
+										+ "=?\");\n");
+						output.write("\t\tsp.set" + getInt(colm.getType()) + "(" + s + ".get"
+										+ AutoBean.getUpper(colm.getName()) + "());\n");
+						output.write("\t\t}\n\n");
+					}
+
+				}
 				output.write("\t\treturn this.jdbc.queryForInt(sb.toString(),sp);\n");
 				output.write("\t}\n\n");
 
@@ -467,6 +506,7 @@ public class WriteDBToJava {
 				output.write("package " + pakg + "." + subUrl4 + ";\n\n");
 				output.write("import java.util.List;\n");
 				output.write("import " + pakg + "." + subUrl1 + "." + key + ";\n");
+				output.write("import java.util.List;\n");
 				output.write("import com.company.common.core.data.jdbc.Page;\n");
 				// output.write("import com.ucf.onlinepay.framework.exception.in.FnFiTechnicalException;\n\n");
 
@@ -479,7 +519,8 @@ public class WriteDBToJava {
 				output.write("\t" + key + " get" + "(" + getInteger(l.get(0).getType()) + " " + l.get(0).getName()
 								+ ");\n\n");
 				// output.write("\tList<"+key+"> query"+key+"ByWhere("+key+" "+s+")throws Exception;\n\n");
-				output.write("\tPage< " + key + ">  list" + "(" + "int pageStart, int pageSize" + ");\n");
+				output.write("\tPage< " + key + ">  list" + "(" + key + " " + s + ",int pageStart, int pageSize"
+								+ ");\n");
 				output.write("}");
 				output.close();
 			} catch (IOException e) {
@@ -533,11 +574,12 @@ public class WriteDBToJava {
 								+ "){\n");
 				output.write("\t\treturn this." + s + "Dao" + ".get(" + l.get(0).getName() + ");\n");
 				output.write("\t}\n\n");
-				output.write("\tpublic Page<" + key + "> list" + "(int pageStart, int pageSize" + "){\n");
+				output.write("\tpublic Page<" + key + "> list(" + key + " " + s + ",int pageStart, int pageSize"
+								+ "){\n");
 				output.write("\t\t" + "Page<" + key + ">" + " " + "page=new " + " Page<" + key + ">()" + ";\n");
 				output.write("\t\t" + "List<" + key + ">" + " " + "data=" + "this." + s + "Dao"
-								+ ".list(pageStart,pageSize)" + ";\n");
-				output.write("\t\t" + "int" + " " + "count=" + "this." + s + "Dao" + ".count()" + ";\n");
+								+ ".list("+s+",pageStart,pageSize)" + ";\n");
+				output.write("\t\t" + "int" + " " + "count=" + "this." + s + "Dao" + ".count("+s + ");\n");
 				output.write("\t\tpage.setCount(count);\n");
 				output.write("\t\tpage.setData(data);\n");
 				output.write("\t\treturn page;\n");

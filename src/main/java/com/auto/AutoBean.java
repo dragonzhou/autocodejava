@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author haibo.huang
  * 
  */
 public class AutoBean {
@@ -30,12 +29,12 @@ public class AutoBean {
 	private static Statement	stm;
 	private static ResultSet	rs;
 	private static String		driver		= "com.mysql.jdbc.Driver";
-	private static String		database_name		= "coupons";
+	private static String		database_name		= "tangguo";
 	private static String		url			= "jdbc:mysql://localhost:3306/"+database_name;
 	private static String		username	= "root";
 	private static String		password	= "andy";
-	public static String		packagename_company	= "xiaoerzuche";
-	private static String		packageName	= "com."+packagename_company+".biz.order";
+	public static String		packagename_company	= "company";
+	private static String		packageName	= "com."+packagename_company+".biz.tangguo";
 
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException,
 					ClassNotFoundException {
